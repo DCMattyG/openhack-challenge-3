@@ -1,4 +1,11 @@
+import os
 import logging
+from pymongo.message import delete
+import requests
+import uuid
+import json
+import pymongo
+from datetime import datetime
 
 import azure.functions as func
 
@@ -43,7 +50,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             pass
 
     if ratingId:
-        return func.HttpResponse(f"Hello, {ratingId}. This HTTP triggered function executed successfully.")
+        mongo_client = pymongo.MongoClient(os.environ["MONGO_DB_CONN_STR"])
+        mydb = mongo_client["openhack"]
+        mycol = mydb["ratings"]
+        rating = mycol.find_one({ "id" : ratingId})
+        del rating["_id"]
+        return func.HttpResponse(json.dumps(rating),
+             status_code=200,
+             mimetype="application/json"
+        )
     else:
         return func.HttpResponse(
              "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
