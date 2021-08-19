@@ -11,9 +11,6 @@ import azure.functions as func
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
-    id = str(uuid.uuid4())
-    time_stamp = datetime.utcnow().strftime('%Y-%m-%d %XZ')
-
     try:
         req_body = req.get_json()
     except:
@@ -28,7 +25,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     if valid_user_id.status_code != 200:
         return func.HttpResponse(
-             "The field userId is missing or invalid.",
+             "The field 'userId' is missing or invalid.",
              status_code=404
         )
 
@@ -38,7 +35,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     if valid_product_id.status_code != 200:
         return func.HttpResponse(
-             "The field productId is missing or invalid.",
+             "The field 'productId' is missing or invalid.",
              status_code=404
         )
 
@@ -46,7 +43,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     if location_name == None or len(location_name) <= 0:
         return func.HttpResponse(
-             "The field locationName is missing or invalid or empty.",
+             "The field 'locationName' is missing, invalid or empty.",
              status_code=404
         )
 
@@ -54,29 +51,29 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     if rating == None:
         return func.HttpResponse(
-             "The field rating is missing or invalid.",
+             "The field 'rating' is missing or invalid.",
              status_code=404
         )
     
-    if(rating > 5 or rating < 0):
+    if (rating > 5 or rating < 0):
         return func.HttpResponse(
-             "The field rating must be between 0 and 5.",
+             "The field 'rating' must be between 0 and 5.",
              status_code=404
         )
 
     user_notes = req_body.get('userNotes')
 
-    if user_notes == None or len(user_notes) <= 0:
+    if (user_notes == None or len(user_notes) <= 0):
         return func.HttpResponse(
-             "The field userNotes is missing or invalid or empty.",
+             "The field 'userNotes' is missing, invalid, or empty.",
              status_code=404
         )
 
     response_body = {
-        "id": id,
+        "id": str(uuid.uuid4()),
         "userId": user_id,
         "productId": product_id,
-        "timestamp": time_stamp,
+        "timestamp": datetime.utcnow().strftime('%Y-%m-%d %XZ'),
         "locationName": location_name,
         "rating": rating,
         "userNotes": user_notes
@@ -89,12 +86,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     del response_body["_id"]
 
-    if (not user_id or not product_id):
-        return func.HttpResponse(f"Request body missing userId or productId")
-    else:
-        return func.HttpResponse(
-            #  "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
-            json.dumps(response_body),
-             status_code=200,
-             mimetype="application/json"
-        )
+    return func.HttpResponse(
+        json.dumps(response_body),
+            status_code=200,
+            mimetype="application/json"
+    )
